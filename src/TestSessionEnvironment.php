@@ -11,6 +11,7 @@ use SilverStripe\Control\Director;
 use SilverStripe\Control\Email\Email;
 use SilverStripe\Control\Email\Mailer;
 use SilverStripe\Control\HTTPRequest;
+use SilverStripe\Core\Config\Config;
 use SilverStripe\Core\Config\Configurable;
 use SilverStripe\Core\Environment;
 use SilverStripe\Core\Extensible;
@@ -277,6 +278,9 @@ class TestSessionEnvironment
         $databaseConfig = DB::getConfig();
         if (!$dbExists && $dbCreate) {
             $this->oldDatabaseName = $databaseConfig['database'];
+            // Ensure we don't allow TempDatabase to immediately kill the newly created DB when the request finishes
+            Config::modify()->set(TempDatabase::class, 'teardown_on_exit', false);
+
             // Create a new one with a randomized name
             $tempDB = TempDatabase::create();
             $dbName = $tempDB->build();
